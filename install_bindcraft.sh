@@ -62,6 +62,10 @@ CONDA_BASE=$(conda info --base 2>/dev/null) || { echo -e "Error: conda is not in
 echo -e "Conda is installed at: $CONDA_BASE"
 
 # Apply channel configuration fix if requested
+
+# Always force classic solver to avoid libmamba issues with Python 3.12
+conda config --set solver classic
+
 if [ "$fix_channels" = true ]; then
     echo -e "Applying channel configuration fix for dependency resolution issues\n"
     conda config --remove channels defaults 2>/dev/null || true
@@ -69,9 +73,6 @@ if [ "$fix_channels" = true ]; then
     conda config --append channels nvidia
     conda config --append channels https://conda.rosettacommons.org
     conda config --set channel_priority strict
-    # Install libmamba solver if available
-    conda install -n base conda-libmamba-solver -y 2>/dev/null || echo -e "Warning: Could not install libmamba solver"
-    conda config --set solver libmamba 2>/dev/null || echo -e "Warning: Could not set libmamba solver"
     echo -e "Channel configuration applied\n"
 fi
 
@@ -217,7 +218,7 @@ $pkg_manager clean -a -y
 echo -e "$pkg_manager cleaned up\n"
 
 ################## finish script
-t=$SECONDS 
+t=$SECONDS
 echo -e "Successfully finished BindCraft installation!\n"
 echo -e "Activate environment using command: \"$pkg_manager activate BindCraft\""
 echo -e "\n"
